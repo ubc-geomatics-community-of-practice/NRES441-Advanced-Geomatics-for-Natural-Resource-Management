@@ -1,0 +1,280 @@
+# Introduction to ENVI & Review of Satellite Imagery {#into-envi}
+
+Written by: Nicholas Coops & Liam Irwin? 
+
+## Lab Overview {-}
+
+ENVI is an application for viewing and analyzing spatial imagery, and it has many tools for remote sensing. If you are curious, the name ENVI stands for “**EN**vironment for **V**isualizing **I**mages” and is written in a programming language called IDL, which stands for Interactive Data Language. IDL is a programming language specialized for the interactive processing of very large datasets.
+
+In this lab you will get familiar with image visualization techniques in ENVI. You may recall many of the remote sensing concepts in this lab from previous classes (NRES 241 & NRES 341). The intention of this lab is to review these concepts and get used to applying them within the ENVI software.  
+
+------------------------------------------------------------------------
+
+### Learning Objectives {-}
+
+-   Explore ENVI 5.6 for visualizing and processing satellite imagery
+-   Create false color composites
+-   Apply image enhancements and understand image histograms
+-   Understand ENVI feature spaces
+
+------------------------------------------------------------------------
+
+### Deliverables {-}
+
+- Answers to questions 1-9
+- Screenshots of 3 feature space images
+
+------------------------------------------------------------------------
+
+### Task 1: Open ENVI & navigate within a scene
+
+**Step 1:** In windows, at the lower left corner of the screen, click the Windows Start Button. Click Programs > ENVI 6.0 > 64-bit > ENVI 6.0 (64-bit), as shown below.
+
+``` {r, echo=FALSE, out.width = "40%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-envi.png')
+```
+
+The first image we will load is a multi-spectral image from the Landsat 5 satellite (**L5047026subset_19990922_7B.dat**) of Vancouver. 
+
+To load the image start the **Data Manager** by clicking the Data Manager icon on the **ENVI Toolbar**:
+
+``` {r, echo=FALSE, out.width = "15%", fig.align = 'left'}
+knitr::include_graphics('images/00/01-data-manager.png')
+```
+
+Once the data manager is open, to open an image file, click the **Open** icon in the **Data Manager**
+
+``` {r, echo=FALSE, out.width = "15%", fig.align = 'left'}
+knitr::include_graphics('images/00/01-toolbar.png')
+```
+
+Navigate to where your project files are saved and select **L5047026subset_19990922_7B.dat**. In a moment, it should appear in the data manager window. If you didn’t already have another image already open, the image will also appear as a layer on your active view (you will see a color image of Vancouver). 
+
+If the image does not load automatically, in the **Data Manager**, right click on the file name and in the context menu that appears select “Load True Color” - we will get into what that means shortly!
+
+Note the **File Information** expandable tab/tree. After clicking on the arrow head, the tab should open up, and display important information about the image, such as dimensions (number of pixels in the X or Y directions), data types, projection, and resolution (listed as Projection/Pixel). This information can be useful when examining an image!
+
+From the **File Information** you can see that the spatial resolution of this image is 30 m by 30 m, square. That means that each pixel in the image represents an area of approximately 30 x 30 m on the ground, or 900 square meters. Furthermore, it is a Landsat 5 Thematic Mapper image of Vancouver and its surroundings taken at 22 September 1999.
+
+Even more details are apparent – its size is 4000 by 3000 pixels, and has seven bands. Projection Information is clearly labeled too.
+
+If your ENVI view is crowded and you can’t see much of the image you can collapse the **Toolbox** or **Layer Manager** by clicking the little arrow in the bar next to it to detach the window and create more space for the images.
+
+``` {r, echo=FALSE, out.width = "85%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-screen.png')
+```
+
+**Step 2:** Use the **Overview Window** to navigate in the scene using zooming and panning tools. On the **Layer Manager**, notice the Overview Window at the top. The overview window shows the full extent of the image, and which part of the scene you are looking at in the view. Display it by checking the box next to **Overview**.
+
+``` {r, echo=FALSE, out.width = "85%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-overview.png')
+```
+
+Have a look at the image in the active view. The Zoom In, Zoom Out, Zoom Extent, and Pan allow you to move around on the image and control how much the image is zoomed in. Try each of these tools out and figure out how they work. Also try navigating the scene using the overview window.
+
+Navigation tools, from left to right: Zoom, Fixed Zoom in, Fixed Zoom Out, and Zoom Extent
+``` {r, echo=FALSE, out.width = "20%", fig.align = 'left'}
+knitr::include_graphics('images/00/01-navigation.png')
+```
+
+The Pan tool:
+``` {r, echo=FALSE, out.width = "5%", fig.align = 'left'}
+knitr::include_graphics('images/00/01-pan.png')
+```
+
+------------------------------------------------------------------------
+
+### Task 2: Displaying greyscale, true color and false color imagery 
+
+**Step 1:**  Recall that greyscale images represents pixels with high reflectance as white and low reflectance as black, everything else in between is shown in shades of grey.
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-data-range.png')
+```
+
+To display a greyscale image in the Data Manager, right click on a **single band**, and select Load Grayscale from the context menu that appears.
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-greyscale.png')
+```
+
+The resulting image should look something like like the following: 
+``` {r, echo=FALSE, out.width = "70%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-grey-image.png')
+```
+
+**Step 2:** Recall that a **true color** image visualizes objects how we would see them in real life. In a Landsat image, Landsat band 1 (Blue – 480 nm) is displayed as blue, band 2 (Green – 560 nm) is displayed as green, and band 3 (Red – 660 nm) is displayed as red. 
+
+You still should see our image named **L5047026subset_19990922_7B.dat** in the Data Manager, and if you have not done so yet, expand the band tree by clicking on plus sign. Here you can see each band to select and show in the display. Click once on the small square next to the band name to assign it to a color for a new composite. Click in the order of Bands Red (band 3), Green (band 2), Blue (band 1), as ENVI assigns bands to the colors in that order. Then click Load data; this will add a new layer your current view. You are now looking at a True Color Landsat image of Vancouver.
+
+``` {r, echo=FALSE, out.width = "70%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-tru-color.png')
+```
+
+**Step 3:** Next we will display a **false color composite** by selecting different wavelengths (bands) to be visualized using red, green and blue colors. Recall that any band combination that assign colors **not** to their real life counterparts is considered false color. Try the following band combination: 
+
+Visualize Band 4 using Red
+Visualize Band 2 using Green
+Visualize Band 1 using Blue
+
+``` {r, echo=FALSE, out.width = "70%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-false-nir.png')
+```
+
+#### Q1) Why does vegetation appear red in the false color composite and green in a true color composite?
+
+In the Data Manager expand the Band Selection dialog and visualize the following band combination:
+Visualize Band 4 using Red
+Visualize Band 2 using Green
+Visualize Band 7 using Blue
+Hit Load Data. Example shown below:
+
+``` {r, echo=FALSE, out.width = "70%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-nir.png')
+```
+
+You can experiment with different band combinations by visualizing different bands using Red, Green and Blue.
+
+#### Q2) What do you think the best composite for mapping vegetation is (Red - ?nm, Green - ?nm, Blue - ?nm)? Is there one composite that can exploit spectral differences among various vegetation types better than another? Explain your choice!
+
+### CLOSE AND RE-OPEN ENVI BEFORE CONTINUING TO TASK 3
+
+------------------------------------------------------------------------
+
+### Task 3: Panchromatic imagery & image enhancement 
+
+The first image we will load is a panchromatic image from the QUICKBIRD-II (http:/tinyurl.com/ycrx3hzz) satellite (Quickbird-II.tif) of Vancouver
+
+**Step 1:** Load the Quickbird-II.tif image into the current ENVI view. If you are unsure about this, review Part 1 for further instructions on loading data, zooming and panning around imagery
+
+#### Q3) What are the spectral and radiometric characteristics of the Quickbird pancrhomatic image?
+
+``` {r, echo=FALSE, out.width = "70%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-qbird.png')
+```
+**Display Window and Data Manager with the Quickbird-II image loaded, and the Overview Window turned on**
+
+#### Q3) Zoom in and inspect the features of the image. If north is straight up in this image, what direction is the sun? What influence does the sun’s position have on the image?
+
+**Step 2:** Next, load the **Landsat7-pan.tif** image. In the Layer Manager try adjusting the order of the images (Landsat on top, vs. Quickbird-II on top), and select the checkmark box beside the images to change the layer visibility.
+
+This second image is a panchromatic Landsat 7 ETM+ (https:/lta.cr.usgs.gov/LETMP) image of Vancouver. 
+
+Next, create a new view for the Landsat image by selecting ‘Views > Two Vertical Views’; Highlight the new, empty view (there will be a turquoise box the view that is selected) in the layer manager and open the Landsat panchromatic file. 
+
+At this point, you should have both of these images (Quickbird-II panchromatic and Landsat7 panchromatic) appearing in their own view in the Layer Manager and both of these images displayed simultaneously on your screen. You can collapse the Toolbox or Layer Manager by clicking the little arrow in the bar next to it to create more space for the images.
+
+``` {r, echo=FALSE, out.width = "70%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-vertical.png')
+```
+**This is what should appear on screen when the first two images have been displayed.**
+
+You may choose to use both layers in the same frame, or both images in different frames, it is your choice.
+
+When using multiple views, a useful trick to view the same areas in both views is to link them. To do this, select ‘Views > Link Views > Toggle Pixel View > Link All’ > OK. Be amazed!
+
+#### Q4) Zoom both the Landsat and Quickbird-II images over Stanley Park (The link views trick described above is very useful for this). Are there features that you can clearly see in the Quickbird-II image that you cannot see in the Landsat image? List them. Why do you think this is?
+
+#### Q5) Given that Landsat data has been made freely available, but has a coarser resolution than Quickbird-II imagery, list two possible uses/applications/advantages of using Landsat data over Quickbird-II. Do some research!
+
+**Step 3:** Next, we will practice applying image enhancements by stretching and re-scaling the image values.
+
+Open **L5047026subset_20090613_7B.dat** as a true colour composite. This is an image of the same area we have been looking at, but from a different year.
+
+#### Q5) There are features in the northern part of this image that are white, what do you think they are? Hint: Try making a false colour composite to differentiate between features.
+
+The white areas in the north of the image are so bright that there is little contrast to be seen in other parts of this image. To improve the contrast the image data can be stretched to show better contrast on the screen.
+
+Recall, **Stretching** the image data refers to the method by which the data pixels are rescaled from their original values into a range that your computer screen can display — namely, into integer values between 0 and 255. For example, if the image data were floating point values that ranged between -1.0 and 1.0, the image might be stretched such that data values of -1.0 are assigned a brightness of 0 and data with values of 1.0 are assigned a brightness of 255. 
+
+The exact method that is used to rescale the image data into brightness values can make a drastic difference in the way that the image looks. Thus, it is quite common to adjust the parameters of the stretch in order to maximize the information content of the display for the features in which you are most interested (in other words, you can try out different stretches until it looks good). This process is referred to as contrast stretching because it changes contrast in the image -- the relative differences in the brightness of the data values (i.e., increasing contrast means that the dark pixels are darker, and the bright pixels are brighter, so the brightness difference between the two is increased).
+
+Through careful adjustment of the image stretch, it is possible to highlight certain features in an image, and ENVI provides several sophisticated tools for this purpose. ENVI’s default stretch is a 2% linear stretch. In this type of stretch, the image histogram is computed, and the cumulative 2% and 98% tails are determined. Then the data value that defines the threshold for the 2% tail is assigned a brightness of 0, the data value that defines the 98% tail is assigned a brightness of 255, and a linear model is used to assign the intermediate values. 
+
+The effect of a stretch on an image can be isolated to a particular section of interest (the area you zoom into vs. the whole extent of the image) - ENVI has a quick dropdown menu to select different stretch options.
+
+``` {r, echo=FALSE, out.width = "5%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-stretch.png')
+```
+
+**Stretch on Full Extent**
+``` {r, echo=FALSE, out.width = "5%", fig.align = 'left'}
+knitr::include_graphics('images/00/01-strech-full.png')
+```
+
+**Stretch on View Extent**
+``` {r, echo=FALSE, out.width = "5%", fig.align = 'left'}
+knitr::include_graphics('images/00/01-strech-view.png')
+```
+
+Try a few different stretches, and see what happens. When you are done, return to the Linear 2% (default) stretch. 
+
+Zoom in to 2:1 (200%) and enter ‘855,1370’ (image coordinates) in the ‘Go To’ menu. Your image should be centered mostly over water now.
+
+#### Q6) With the image centered on the coordinates provided above, examine any differences between the image by playing with the Stretch on Full Extent and Stretch on View Extent. List some differences you notice. Describe why you think they occur.
+
+#### Q7) What are some of the positive and negative implications of doing a stretch for data analysis?
+
+**Step 4:** Now we will generate image statistics and plot histograms of pixel values. 
+
+Zoom to the full extent of the image, and pick a stretch that you like.
+
+Summary statistics for the image can be generated by using the Compute Band Statistics tool. From the Toolbox at the right of the screen, Select Statistics > Compute Band Statistics
+
+``` {r, echo=FALSE, out.width = "20%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-toolbox.png')
+```
+
+Select the image (L5047026subset_20090613_7B.dat) and press the **“Spectral Subset”** button.
+
+``` {r, echo=FALSE, out.width = "40%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-stats.png')
+```
+
+We want to use the parts of the spectrum up to and including band 7, and exclude band 6, the thermal band. Therefore, we can display a histogram for all of the bands except for band 6. Select bands 1, 2, 3, 4, 5, and 7 (press and hold the control key while clicking to select multiple, non-continuous bands). 
+
+Press OK for both open dialogue boxes.
+
+``` {r, echo=FALSE, out.width = "40%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-subset.png')
+```
+
+Check *Histograms* and then click OK.
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-hist.png')
+```
+
+Use the "Select Plot" button at the top of the window to plot histograms for each of the spectral bands. 
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-plot.png')
+```
+
+The resultant histogram that is output, pictured above, summarizes the number of pixels in the layer that have any given gray value (intensity). This is a very useful overview of a basic property of an image. It is important that you understand just what the histogram and the included statistics represent. Vancouver appears dark because, for any given band, the average pixel has low intensity (e.g. 35.7 for band 2) while the maximums, which may represent just a single pixel, are much higher (e.g. 255).
+
+#### Q8) Overall what band has the brightest values? What features in the image could contribute to high reflectance in this band? 
+
+------------------------------------------------------------------------
+
+### Task 4: Feature space 
+
+Another way of looking at image data is by displaying it in a scatter plot instead of as an actual image, this is referred to as the ‘feature space’. A feature space graph can be displayed by selecting Display > 2D Scatter Plot. In the plot window there are sliders on the X and Y axes that select the bands to display. Bychecking "Density Slice" (the color wheel at the top) the graph is colour coded by the number of pixels having that same value, so brighter areas mean there are more pixels at that value.
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-features.png')
+```
+
+The Scatter plot is linked with the view image in two ways. If you hold the left mouse button over the image, the pixel values within the square (i.e. patch) light up in the graph (you can change patch size in Options > Patch size). 
+
+It is also possible to draw an area on the graph, and right click to have these pixels coloured in the image. Try this out by holding down the left mouse button and drawing over an area of the scatterplot, and release when you complete your shape, or the area that you think corresponds to a class listed in Question 9. Then right click to fill in the shape on the scatterplot with that class’ color (listed under Class Functions drop down menu in the Scatterplots window). This color will then correspond with the current view in ENVI, and will color in the areas that match those pixel values in the scatterplot with the color shown on the scatterplot. NEAT! To undo a class, click the Clear button to undo that one class shape you’ve made, or check mark the All Classes box to delete all shapes made on the scatterplot. 
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/00/01-fs.png')
+```
+
+**Include screenshots of the Bands 1 & 2 feature space and the Bands 4 & 5 feature space in your deliverables and use them to answer the following question**
+
+#### Q9) Explain why the feature space of spectral bands 1 & 2 has such a different shape compared to feature space of spectral bands 4 & 5? What shape of a feature space is best for image classification? Justify your answer.
+
+**Include a screenshot of a feature space image of the Red vs. NIR bands. Label where pixel values for the following land covers generally are in this relationship: Clear water, turbid water, forest, agriculture fields, urban area, bare soil, cloud. Feel free to do this manually, using Microsoft Paint, or the ENVI software.**

@@ -1,0 +1,160 @@
+# Mapping Forest Disturbance with Landsat Time series {#time-series}
+
+Written by: Hana Travers-Smith 
+
+## Lab Overview {-}
+
+Landsat time series data is a valuable tool for mapping forest disturbance history due to its consistent global coverage and long temporal record, dating back to 1972. By analyzing a sequence of Landsat images, forest disturbances such as logging, wildfires, insect infestations, and storms can be detected and monitored over time. Changes in vegetation reflectance captured in multispectral bands, especially the near-infrared (NIR) and shortwave-infrared (SWIR) bands, are used to identify disturbances.
+
+In this lab you will use a time series of Landsat images from 2000-2020 to map wild fire history for a forest located near Williams Lake BC. 
+
+------------------------------------------------------------------------
+
+### Learning Objectives {-}
+
+- Visualize Landsat images and interpret forest change over time
+- Understand how color/band combinations can enhance change detection 
+- Understand how change in spectral indices can be used to map forest disturbance
+- Apply an unsupervised classification and interpret the results 
+
+------------------------------------------------------------------------
+
+### Deliverables {-}
+
+- Answers to 8 questions from the lab instructions 
+
+------------------------------------------------------------------------
+
+### Data {-}
+
+- Annual Landsat Best-Available-Pixel (BAP) Surface Reflectance Composites from 1984-2022
+
+Best Available Pixel Composites are used to create high quality, cloud-free images from multiple overlapping scenes of the same area. Each pixel is assigned a score representing its quality based on how cloudy or hazy it is, or what sensor it is from. Only the "best" pixels with the highest scores are retained - so a single BAP composite has only high-quality pixels from many different image acquisitions which reduces the number of data gaps within an image. 
+
+For this lab, BAP composites were created for every year using Landsat scenes acquired within the growing season (July-August). So the 1999 BAP composite will only contain pixels from the 1999 growing season. 
+
+Annual BAP composites were then stacked in 5-year periods (i.e. 1990-1995) and the median value across the 5 scenes was calculated. This step was taken to reduce differences in scene illumination and data availability that can create artefacts within annual BAP composites. Each raster in the lab contains the time period in the layer name. 
+
+The study area for this lab is a forested region just outside of William's Lake, BC.
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/02/03-series.png')
+```
+
+------------------------------------------------------------------------
+
+### Task 1: Import and build raster time series
+
+**Step 1:** Open EVI > File > New > Build Raster Series. Click Add Raster > Add Filename and navigate to the folder containing the .tif files for this lab. Hold the "Shift" key down and select all the .tif files > Open.
+
+In the Rasters panel look at the filenames and ensure that they are listed in chronological order. Check "Order by Time". Name the output "time_series" and save it to the same folder as the input rasters > OK. 
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/02/03-timeseries.png')
+```
+
+Use the arrows on the "Series Manager" window to examine each image in the time series. Note that the acquisition date shows the first year in the 5-year time period. If you close this window you can open it again using Display > Series/Animation Manager. 
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/02/03-seriesman.png')
+```
+**Step 2:** To visualize different band/color combinations select the time series object in the Layer Manager and change the Band Combinations using the sliders in the bottom right corner. Experiment with the Shortwave infrared and Near-infrared color combinations.  
+
+``` {r, echo=FALSE, out.width = "40%", fig.align = 'center'}
+knitr::include_graphics('images/02/03-bands.png')
+```
+
+#### Q1) Multiple forest disturbances have occurred in this study area. What images do the disturbances become apparent in? Based on the image dates - what is the likely year of each disturbance? (Note that each image represents the median reflectance value across 5 consecutive years!) 
+
+#### Q2) Choose one of the false color band combinations. How does this color combination enhance differences in forest types across the image? Describe how disturbances and recovery are depicted over time using this color combination? 
+
+**Step 3:** Right click on the raster series object in the Layer Manager (it has a red box with the number 1) > Profiles > Series. The Series Profile window will show the change in spectral values over time. You can change the spectral band that is being plotted by clicking on the "Source" button at the top of the window. 
+
+To change the image dates to the year of acquisition expand the window and in the "General" tab click Date Format > Mon YYYY. Although the month of acquisition should be July for each image, ENVI may display other months. The year indicates the first year in the 5-year time period. 
+
+#### Q3) Examine spectral time series for the NIR band in different parts of the image. Compare the time series for a disturbed and undisturbed pixel. Include a screenshot of each time series plot showing the crosshairs on the image. Describe the pattern in NIR reflectance over time - note also potential differences in the minimum and maximum values of NIR reflectance. 
+
+------------------------------------------------------------------------
+
+### Task 2: Calculate Normalized Burn Ratio using ENVI Modeler
+
+In this task you will use the ENVI Modeler to build a processing workflow and calculate the Normalized Burn Ratio (NBR) for each raster in the time series. 
+
+ENVI Modeler is a visual interface that allows you to automate image processing and analysis tasks using a graphical interface. Each step in the workflow is represented by a **node** representing input layers and data processing tools. By creating a Modeler workflow you can automatically run the same processing steps across multiple rasters in a row - without the need for coding expertise! 
+
+The key to this process is the **"Iterator"** node which takes a list of rasters as the input and applies the same processing tasks to each raster in the list. 
+
+**Step 1:** Display > ENVI Modeler. On the left there are lists of node types including inputs to the model and specfic tasks. We will create a simple model to read in the time-series data, calculate the Normalized Burn Ratio and write a new raster layer of the output.  
+
+``` {r, echo=FALSE, out.width = "70%", fig.align = 'center'}
+knitr::include_graphics('images/02/03-modeler.png')
+```
+**Step 2:** Click on **File** under basic nodes to add an input data source to the model. Select "Raster series" and then navigate to the time series object you created in the last task.  You should now see a blue box in the Layout window populated with the "time_series.series" object.   
+
+Add the following data processing steps into the model by searching for them in the Basic Nodes and Tasks menus. Read the description for each node by selecting it in the menu. Once all nodes are added to the Layout window connect them using arrows (click on a node and draw a connection to the next node.) 
+
+``` {r, echo=FALSE, out.width = "100%", fig.align = 'left'}
+knitr::include_graphics('images/02/03-model.png')
+```
+
+**Step 3:** On the Spectral Index tool click on the three dashed lines to open the tool parameters. Change the "Index" field to Normalized Burn Ratio.
+
+**Step 4:** We also need to set the parameters for the "Generate Filename" node. This node will generate a unique output file name for each raster in the time series so we don't overwite outputs with the same name!   
+
+Right-click on the connection between "Iterator" and "Generate Filename" > Edit Connection. Click on "Iteration Index" and then the "Number to Append" to connect these two variables. This will send a unique index number from the iterator to the file name generator - which will append the index to the end of the file name.  
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/02/03-connect1.png')
+```
+
+Click on the dashed lines of the "Generate Filename" tool. 
+
+- Choose a directory to save the NBR outputs to
+- Filename Prefix: NBR_ 
+- Check No for "Append Random Number" 
+- Extension: .dat 
+
+Right-click the connection between "Generate Filename" and "Spectral Index" > Edit Connection. Connect "Output Filename" and "Output Raster URI". This will give the unique filename to the output raster. 
+
+#### Q4) Describe in words what each node in the model does and what its input data are. Provde a description for each node in the workflow.  
+
+When you are done click Run. After the model finishes running you should see the NBR layers appear in the Layer Manager. The index values appended to each layer run from 00 (first layer in the time-series) to 015 (last layer).  
+
+#### Q5) How is the Normalized Burn Ratio calculated? 
+
+#### Q6) When a pixel has a very low or negative value of NBR what does that indicate about the disturbance history of that pixel?
+
+------------------------------------------------------------------------
+
+### Task 3: Classify fire history over the landscape
+
+**Step 1:** Make a raster stack from the Normalized Burn Ratio layers. In the Toolbox search for "Build Layer Stack". 
+
+- Input Rasters: All Normalized Burn Ratio rasters created in the last step (select multiple files by holding the shift key and clicking the first and last files)
+- Grid definition: select the "From Dataset" button and select any of the NBR rasters
+- Resampling Method: Nearest Neighbour
+- Output Raster: Save the output in your data folder as "NBR_stack"
+- Display Result: Checked
+
+You should now see a new layer in the Layer Manager and on the map. The default color combination is to assign the top three rasters in the layer stack in the Red, Green and Blue channels. In this case you will see the *last* three images in the time series visualized in this way.
+
+Next, we will rename the bands so it is easier to understand what is happening. Right click on the "NBR_stack" in the Layer Manager > View Metadata > Edit Metadata > Display > Click on the folder "Import from ASCII" > open the "band_names.txt" file. The bands in the Layer Manager should now be labelled with their respective image years.
+
+#### Q7) Why do some areas of this false color composite appear red and others black? (Hint: You can use the cursur tool to select pixels and see the NBR values for each band.)
+
+``` {r, echo=FALSE, out.width = "70%", fig.align = 'center'}
+knitr::include_graphics('images/02/03-nbrstack.png')
+```
+
+**Step 2:** Next we will classify the image using the NBR image stack with an **IsoData Classification**. This is an unsupervised classification that will classify pixels based on similarity in the NBR values are over time.  
+
+Search for "IsoData Classification" in the Toolbox. 
+
+- Input Raster: NBR_stack
+- Number of Classes: 4
+- Output Raster: NBR_time_series_classification
+- leave all other settings as default 
+
+Examine the output classification raster. Compare it with a time series of NBR layers to address the next question.  
+
+#### Q8) Include a screenshot of the output raster including the Layer Manager showing the classification legend. Write a short description of each fire history class identified in the image. (For example "Class 1" could be "Newly burnt areas" or "Class 2" could be "Low NBR and never burned"). 

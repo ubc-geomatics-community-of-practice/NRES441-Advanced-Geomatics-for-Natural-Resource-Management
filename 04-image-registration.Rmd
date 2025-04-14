@@ -1,0 +1,168 @@
+# Image Registration for change detection {#image-reg}
+
+Written by: Hana Travers-Smith 
+
+## Lab Overview {-}
+
+Image Registration is the process of aligning two or more images of the same region taken at different times, from different viewpoints, or by different sensors. The goal is to match corresponding points in the images so they can be overlaid accurately. This process involves selecting control points (features that are easily identifiable in each image) and transforming the images using mathematical models.Image registration is crucial in remote sensing and mapping because it ensures that images from different time periods or sources can be compared or analyzed together.
+
+In this lab you will use ENVI software to register two aerial images of UBC captured in 2000 and 2022. You will then overlay the images and identify changes in land use between the two time periods. 
+
+------------------------------------------------------------------------
+
+### Learning Objectives {-}
+
+- Learn how to identify high quality control points between images
+- Understand how to apply image transformations 
+- Quantify error in the transformed image  
+
+------------------------------------------------------------------------
+
+### Deliverables {-}
+
+- Answers to 9 questions from the lab instructions 
+
+------------------------------------------------------------------------
+
+### Data {-}
+
+- Two aerial images of UBC acquired in 2000 and 2022. The images can be downloaded from the UBC Dataverse.  
+
+------------------------------------------------------------------------
+
+### Task 1: Import images into ENVI & apply tie points
+
+**Step 1:** Open ENVI and use the File button to import the **ubc_ortho_2000.hdr** and the **V_Ortho_2022.jpg**. Notice that the 2000 orthomosaic contains spatial metadata but the 2022 orthomosaic does not. We will use the 2000 orthomosaic as a reference to register the 2022 orthomosaic. 
+
+#### Q1: What is the projection, units and spatail resolution of the 2000 orthomosaic? 
+
+**Step 2:** Navigate to Toolbox > Registration > Image Registration Workflow. Set the **Base Image File** as the 2000 orthomosaic and the **Warp Image File** as the 2022 orthomosaic > Next.
+
+Your screen should now be split in half with the base layer on the left and the warp image on the right. 
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-image-reg.png')
+```
+
+**Step 3:** ENVI can automatically generate tie points by matching similar features between our images, but first we will need to manually add at least **3 Seed Tie Points** to get the software started. 
+
+Good seed points should be easily identifiable features in **both** images and should represent stable point locations that do not change over time. Examples would be intersections of major roads, the corners of buildings or other man-made features. Features like shorelines or cars would not be good seed points as they may move over time. 
+
+#### Q2: Why might some buildings on campus not make good seed points? 
+
+Open the **Seed Tie Points Window**. Use the Pan tool to navigate to your first seed point. Align the crosshairs in both images to the seed point, you should zoom into the image to try and match the points as closely as possible. To switch between the base and warp image you can click on the layers in the Layer Manager. 
+
+When the crosshairs are aligned click the green + button in the **Seed Tie Points** window. The example below shows a seed point located at a road intersection at the top of campus.   
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-tiepoint1.png')
+```
+
+**Repeat this process two more times to get three tie points** The tie points should be distributed across the image as widely as possible (i.e. don't cluster the points together). As you add tie points they will be added to the tie point table which shows the x and y image coordinates of each point in the base and warp images.
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-table.png')
+```
+
+**Step 3:** Once you have three tie points check "Predict Warp Location". 
+
+Click on a new location in the 2000 base orthomosaic. Notice that ENVI now tries to predict the location of the tie point in the warp image! The prediction will likely be close to the actual tie point, but may still be slightly off you will need to manually refine the warp tie point.  
+
+**Create two more tie points with the "Predict Warp Location" turned on.** 
+
+Your map should now look something like the following (you don't need to have the exact same tie points as shown below). 
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-tiepoints5.png')
+```
+
+#### Q3: Why do you want the tie points to be distributed across the map? What might happen if we clustered them together in the same area? 
+
+**Step 4:** Now that you have 5 seed tie points go to the "Advanced" window in the Tie Points Generation tool. Change the "Requested Number of Tie Points" to **20**. in the "Main" window change the "Maximum Allowable Error" to **30**. Leave all other settings as the default > Click Next.
+
+**Step 5:** Wait for the tool to run. Next we will review the automatically generated tie points and discard any erroneous points. Make sure the "Predict Warp Location" and "Link View" options are on. 
+
+You may not get the requested number of tie points if the software can't find suitable points with small enough error. Proceed if you have at least 5 automatic tie points. If you don't have enough points, increase the Maximum Allowable Error by 5 and try again.
+
+Select each tie point in the table and inspect it to make sure it is correctly matching features in the image. Delete any tie points that you can't confirm the accuracy of. The example below shows an automatic tie point generated in the ocean (the point indicated by the 1. label). It is very hard to confirm this as an accurate tie point as there is no consistent nearby feature in either image, so it was discarded. 
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-bad-tie.png')
+```
+
+Notice that the tie point table now has two extra columns: SCORE and ERROR.
+
+SCORE is a measure of how closely the warp and base images matched at that location with higher values indicating more similarly. 
+
+ERROR is the distance between each tie point in the warp image to its predicted location, in number of pixels. Note that higher error does not necessarily reflect the positional errors in the tie points. **The best way to check the accuracy of the tie points is to visually examine their placement in the side-by-side views.** RMS Error at the bottom of the window shows the average error across all points.
+
+Review the tie points by discarding unverifiable points. As you do this the SCORE and ERROR in the table will update automatically. **You should retain 5-10 tie points.**
+
+**Step 6:** When you are satisfied with the tie points save them and as "tie_points.pts" and proceed to the next task.  
+
+#### Q4: What differences in how the images were acquired might lead to challenges in matching pixel locations? 
+
+------------------------------------------------------------------------
+
+### Task 2: Apply image transformations 
+
+**Step 1:** We will now try the three Warping Methods available in ENVI to transform the 2022 orthomosaic:
+
+- RST: The simplest method which allows for scaling, rotation and shifting in the vertical and horizontal axes.   
+- First order polynomial: Allows for more complex "curved" transformation between the base image and the warp image.  
+- Triangulation: Aligns the base and warp images exactly to the tie points, but may introduce more error in regions without nearby tie points.  
+
+Switch to the "Warping Parameters" window. Set the Warping Method to "RST". Leave all other parameters as the default settings. 
+
+**Toggle on the Preview button.** This adds a window to the Base image showing a preview of the Warped image with the image transformation applied. Pan around the image with the Preview window on and visually compare the three Warping Methods. 
+
+You will likely notice some distortions between the base and warp images even after transformation.      
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-preview.png')
+```
+
+#### Q5: Using the preview window do you notice any differences among the warp methods? Take 3 screenshots of the same area using the three warp methods to compare distortions (see example above). Include a figure caption. 
+
+**Step 2:** Choose one of the Warp Methods and click "Finish". You should now have a warped 2022 orthomosaic. Toggle the warped 2022 image on/off and compare the alignment with the 2000 base layer. 
+
+#### Q6: What transformation did you pick? Compare the base and warped images at different scales by zooming in and out. What do you notice about the image alignment at different scales? 
+
+------------------------------------------------------------------------
+
+### Task 3: Assess temporal change & transformation accuracy
+
+**Step 1:** Create a second "View" screen by navigating to "Views" on the top ribbon > Two Vertical Views. Display the 2000 orthomosaic in one view and the warped 2022 orthomosaic in the second view (drag and drop into the empty view screen). 
+
+Link the views > Views > Link Views > Toggle on Geo Link > Link All > OK
+
+#### Q7: Pan around the campus maps and find examples of 2 land cover or land use changes. Take screenshots from the lab showing these areas (see example below). Use PowerPoint or any image editing software to create figures that highlights these changes and write a short description in the figure caption.
+
+``` {r, echo=FALSE, out.width = "50%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-figure.png')
+```
+
+**Step 2:** Return to a single View and add both images to the display. We will now quantify distortion in the warped image by measuring the displacement between points in the base image and the warp image. 
+
+Plot the two images on top of each other and zoom in so you can clearly see the outlines of buildings. If you Toggle the top layer on/off you may notice that the building appears to "shift" between the two images. We will measure this shift to quantify error in the registration process.
+
+Find a building that is identifiable between both images. Click on the "Mensuration" tool on the top ribbon.  
+
+As precisely as you can click on the corner of the building in the 2000 orthomosaic. Toggle to the 2022 orthomosaic and click again on the same corner of the building in the second image. Right click > Accept. 
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-mensuration.png')
+```
+
+The line on the map represents the displacement between the images at that location. The Mensuration window shows you the distance between the two points in meters and the angle, record these values. 
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-error2.png')
+```
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/03/04-error.png')
+```
+
+#### Q8: Repeat this process for 4 more features (they don't have to be buildings - try to pick other features like trees or street corners). Take a screenshot showing the measured line and one of the 2000 or 2022 orthomosaic as a reference image. Report the average error between the five points and the average angle.  
+
+#### Q9: What was the range in error among your five points? What features or locations had less error? 
