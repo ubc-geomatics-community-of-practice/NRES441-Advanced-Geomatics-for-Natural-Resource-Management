@@ -1,0 +1,68 @@
+# Mapping air quality using spatial interpolation #
+
+Written by: Hana Travers-Smith 
+
+## Lab Overview {-}
+
+Spatial estimation in GIS refers to the process of predicting or estimating values at unsampled locations based on known values from surrounding areas. It leverages spatial relationships, such as spatial autocorrelation, to interpolate new data. Interpolation methods rely on mathematical algorithms to generate continuous surfaces using data collected at discrete points. 
+
+In this lab, you will use air quality data representing monthly maximum values of fine-particulate matter (PM25) collected from meteorological stations across BC. Air quality data were collected over the summer of 2023. You will use spatial estimation tools in ArcGIS Pro to assess spatial autocorrelation and then compare different interpolation methods to model change in air quality over time. 
+
+------------------------------------------------------------------------
+
+### Learning Objectives {-}
+
+------------------------------------------------------------------------
+
+### Deliverables {-}
+
+------------------------------------------------------------------------
+
+### Data {-}
+
+https://catalogue.data.gov.bc.ca/dataset/air-quality-and-climate-monitoring-unverified-hourly-air-quality-and-meteorological-data/resource/7fd21841-b133-4f39-b9b2-6bfa34a7cf6c
+
+https://catalogue.data.gov.bc.ca/dataset/air-quality-and-climate-monitoring-verified-hourly-air-quality-and-meteorological-data
+
+
+### Deliverables {-}
+
+- Answers to questions 1-9 
+
+------------------------------------------------------------------------
+
+### Task 1: Load air quality station data
+
+- Import the text delimited file of monthly air quality and join to the station locations by station name (EPSG: 4326)
+
+- Project the points to BC Albers coordinate system (angular unit of m)
+
+- Create three separate point layers by filtering max PM25 based on month (July, August, September)
+
+- Symbolize the monthly data by maximum PM25
+
+------------------------------------------------------------------------
+
+### Task 2: Understand spatial autocorrelation 
+
+- Create a heat-map of station locations 
+
+- Calculate and interpret Global Moran's I - is monthly maximum PM25 spatially auto-correlated?
+
+- Use spatial autocorrelation tool to calculate a distance threshold for IDW 
+
+------------------------------------------------------------------------
+
+### Task 3: Apply and compare interpolation methods
+
+- Inverse Distance Weighted
+
+- TIN
+
+- Spline
+
+- Compare three methods using one month of data using a multipanel map 
+
+- Pick the "best" one using visual propoerties of the interpoalted surfaces and then apply the same model across the other two months of data
+
+- How does PM25 change over the summer? (another multipanel map)

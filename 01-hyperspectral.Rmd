@@ -1,0 +1,198 @@
+# Hyperspectral Data Processing {#hyperspectral}
+
+## Lab Overview {-}
+
+Written by: Trevor Jones
+
+Hyperspectral data refers to imagery with many, many spectral bands - in some cases there may be several hundred individual continuous bands acquired at very high spectral resolution (1 nanometer intervals)! Compare this to multispectral imagery which may have a 10-12 bands with much coarser spectral resolution (hundreds of nanometers per band). Hyperspectral imagery is useful in deriving continuous spectral profiles and can be used to identify differences in closely related materials (for example, individual tree species). 
+
+The ENVI software has advanced tools to process and analyze hyperspectral data. Specifically, this lab will familiarize you with the use of the Spectral Angle Mapper (SAM) for digital image classification. Using the SAM classification routine you will define spectrally unique materials contained within a scene. These unique spectral profiles are called "endmembers" and can be used to map land cover types across a hyperspectral scene. In the first part of this lab you will extract reference spectra from the spectral library and compare spectral profiles for different tree and land cover types. In the second part, spectral endmembers derived from un-mixed pixels in the hyperspectral image will be used to classify the surface features of the image. 
+
+------------------------------------------------------------------------
+
+### Learning Objectives {-}
+
+- Extract and examine spectral profiles from hyperspectral data
+- Compare unique spectral profiles
+- Learn how and why to use Spectral Libraries
+- Compare data-derived spectra to known spectra from a library
+
+------------------------------------------------------------------------
+
+### Data Description
+
+The exercises in this lab will use georegistered and atmospherically corrected hyperspectral AISA data from 2006 of British Columbia’s Gulf Islands region. This data has been spectrally subset into 411 channels between 430 and 2400 nanometers. A n.asc format Spectral Library, which consists of eight spectra measured over the wavelength range of 350 to 2500 nanometers using an ASD FieldSpec Pro FR spectroradiometer has also been included.
+
+------------------------------------------------------------------------
+
+### Deliverables {-}
+
+- Answers to questions 1-9 
+
+------------------------------------------------------------------------
+
+### Task 1: Spectral and spatial profile extraction 
+
+**Step 1:** Open the hyperspectral AISA image file from the Main ENVI menu by choosing File > Open. Select **1956_3_a_**. 
+
+Use the Data Manager (clipboard icon) to display bands 39, 69, and 111 as an RGB true color composite. One method to do this by expanding ‘Band Selection’ and selecting the proper bands for each color. Band 39 corresponds to approximately 481 nanometers (Blue), while band 69 corresponds to approximately 550 nanometers (Green), and band 111 corresponds to approximately 649 nanometers (Red).
+
+**Step 2:** ENVI can also extract **continuous** spectral profiles of individual pixels in the hyperspectral image display. With spectral profile extraction the information is extracted from the whole file, not just the wavelength bands displayed on the screen. In other words, if 453 bands of AISA data exist in a file and a spectral profile was extracted from a gray scale image of this file, the spectral plot would show the values for that pixel in all 453 channels.
+
+To do this select Display from the drop down menu > Profiles > Spectral. 
+
+**Step 3:** Move the position of the zoom box in the Main image window by clicking the left mouse button inside the zoom box and dragging it to a new location. When the mouse button is released, the **Spectral Profile** window automatically updates to reflect the spectra of the particular spatial location selected with the mouse (the pixel highlighted by the cross-hairs in the Zoom window). If the user first clicks outside the zoom box and drags the cursor, the zoom box follows the cursor and the spectral profile updates continuously as the cursor is re-positioned. The spectral profile shows the selected pixel’s value for every channel of data in this file.
+
+**Step 4:** Examine the spectral profile for the RGB image window. You can visualize band placement along the spectrum by clicking Options > RGB Bars. The red, green, and blue lines indicate the positions of the currently displayed bands are shown below: 
+``` {r, echo=FALSE, out.width = "40%", fig.align = 'center'}
+knitr::include_graphics('images/01/02-spectral-profile.png')
+```
+
+**Step 5:** To display the plot legend, click the right mouse button in the plot area and then select Legend. This action turns the legend on and off.
+
+To zoom in and out you can use the scroll function on your mouse. Clicking the left mouse button inside the plot will display the X and Y data value at that particular position. 
+
+**Step 6:** Next, we will visually compare spectra derived from an image to those collected in the field or laboratory. This allows for quick comparisons of image spectra to the spectra of known materials. Absorption and reflectance features are easy to compare when the spectra are plotted in the same window.
+
+Select a Spectral profile from a bright green area in the RGB image. Use the scroll wheel to identify exact pixels. 
+
+**Step 7:** We will now alter and export this spectra as a text file for later use. First, we will change the name and color of the spectra by expanding the Spectral Profile window and editing the Curve tab.
+
+Rename the spectral signature **Image-Green** and change its color to Green. Click Export > ASCII in the spectral profile window and save it somewhere accessible.
+
+``` {r, echo=FALSE, out.width = "60%", fig.align = 'center'}
+knitr::include_graphics('images/01/02-green.png')
+```
+**Note: The user can resize the window that contains the spectral plots at any time by simply dragging one of the plot window’s corners to the new size.**
+
+From the Spectral Profile plot window, copy the **Image-Green** spectral signature to a new window by going to the Options menu and selecting **New Window with Plots**.
+
+**Step 8:** Return to the RGB image window. Select a second spectrum from the image. This time select a bright pink/blue pixel from the RGB image. Again use the left mouse button in the Zoom window to precisely extract a pixel signature.
+
+In the Spectral Profile plot window change the color of this image spectrum to yellow and its name to **Image-Yellow**. Export this spectra as ASCII to the same location as Image-Green.
+
+You can Import Image-Green and Image-Yellow into the same plot window to compare them. Sometimes ENVI scales the Y-values of the spectra “behind” the scenes. To avoid this, leave the X Data Units = Unknown during import. This will automatically open another dialogue box with which you can inspect the X and Y Units, as well as any scaling. Since the spectra are from the same image, any scaling factors should be set to 1.
+
+------------------------------------------------------------------------
+
+### Task 2: Building spectral libraries in ENVI
+
+Libraries of field or laboratory spectral signatures can be used to visually and analytically identify characteristics in an image. ENVI includes several public domain spectral libraries, as well as tools to work with them. Although several laboratory spectral libraries are shipped with ENVI, investigators often want to create their own libraries from their field or laboratory spectra. Once a spectral library has been built, the spectral viewer and plot windows can be used with the new library. The library entries can be imported from .asc files, other spectral libraries, ROI means, spectral profiles, and plots. Spectral library files may also be created outside of ENVI as long as the binary file has the correct format.
+
+For the purposes of this lab, you will be using ```.asc``` files to build a spectral library. The ```.asc``` files include 14 spectral samples gathered using a ASD FieldSpec Pro FR spectroradiometer. The sample spectra were collected by UBC FRM IRSS researchers during a field campaign in July, 2006 on Saturna Island. The 14 spectra samples include the dominant spectral components of the scene abstracted by the hyperspectral AISA data. The spectra collected are as follows, with the code for each spectra indicated in brackets:
+
+Conifer species:
+
+- Douglas-fir (Fd)
+- Grand fir (Bg)
+- Lodgepole pine (Pl)
+- Western hemlock (Hw)
+- Western red cedar (Cw)
+
+Deciduous species:
+
+- Arbutus (Ra)
+- Garry oak (Qg)
+- Bigleaf maple (Mb)
+- Red alder (Dr)
+
+Ground cover: 
+
+- Soil (HB1_soil)
+- Grass (HB2_mg4)
+- Coarse woody debris (OF1_cwd1)
+- Bracken fern (HB1_bracken)  
+- Moss (OF3_mysterymoss)
+
+**Step 1:** In order to build a spectral library within ENVI, start in the ENVI toolbox menu and choose Spectral > Double Click Spectral Libraries > **Spectral Library Builder**.
+
+**Step 2:** Choose ASCII File and navigate to the .asc file provided for this lab (**new_lab_lib.txt**). In the Input ASCII File dialogue, leave the wavelength column as 1, leave the FWHM column empty, set the wavelength units to nanometers, and leave the Y Scale Factor as 1. If nothing appears in the next window don’t worry. Move on to Step 3.
+
+**Step 3:** Next, in the Spectral Library Builder dialogue, Import the ```.asc``` file provided for this lab again (**new_lab_lib.txt**).
+
+In the Input ASCII File dialogue, designate the **Wavelength Units** as nanometers, and leave the **Y Scale Factor** as 1. Make sure that the number of items selected is 14 (corresponding to the number of spectra being utilized). Click OK.
+
+**Step 4:** In the **Spectral Library Builder** dialogue, choose Select All, and then under the File menu, choose to save spectra as a **Spectral Library File**.
+
+**Step 5:** In the **Output Spectral Library** dialogue, label the X axis as wavelength in nanometers, label the Y axis as scaled reflectance, leave the **Reflectance Scale Factor** at 1, and leave the **Wavelength Units** as nanometers. Save it somewhere accessible.
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/01/02-spectral-lib.png')
+```
+
+------------------------------------------------------------------------
+
+### Task 3: Analyzing spectral libraries
+
+**Step 1:** In this task, you will plot and compare spectra from the library you created in the previous step. If you closed your Spectral Library Viewer you can re-open it by selecting Display > Spectral Library Viewer. 
+
+From the Spectral Library Viewer dialog, select one spectrum from the list. It will appear in the plot window. To add another signature simply click the desired spectra.
+
+To see the legend for the spectral signatures plotted, click the right mouse button in the plot and select Legend. Click and drag the scroll wheel inside the plot to zoom in on particular features. To zoom back out, click the scroll wheel again. Note the differences in absorption and reflectance features of different spectra.
+
+``` {r, echo=FALSE, out.width = "80%", fig.align = 'center'}
+knitr::include_graphics('images/01/02-spectral-viewer.png')
+```
+**Step 2:** From the expanded menu in the Spectral Library Viewer (SLV) window, select Remove All Curves. Then, plot all of the tree spectra simultaneously. These 9 spectra will be used with the next task to map tree species in the image.
+
+**Step 3:** Display the legend and the nine tree spectra labels. Open a new plot Display > New Plot Window and add the 9 tree spectra. Add the **Image-Green** spectra we created in the previous task as well by clicking Import > ASCII > navigate to the ASCII file.
+
+Answer questions 1 - 3 using the **Image-Green** spectrum and the 9 tree spectra. To answer question 4 - 6, repeat step 2 & 3, this time with the non-tree spectra and the **Image-Yellow** spectrum in the Plot Window.
+
+Leave the Spectral Library Viewer window open. If desired, the Spectral Profile plot windows may now be closed.
+
+*Important note: If the user is ‘dragging and dropping’ a spectrum, and the cursor label disappears when the cursor is put in the window that is receiving the spectrum, there may be multiple plot windows stacked on top of each other. ENVI will automatically copy the spectrum into the bottom-most plot window. To work around this behavior, either move the plot window that is receiving the spectrum so that there are no plot windows beneath it, or find an area in the receiving plot window where the cursor label returns before dropping it.*
+
+**Take a screenshot of the Spectral Library Viewer showing the 9 tree spectra and the Image-Green spectra with the Legend included. Include this screenshot in your final deliverables**
+
+#### Q1) How do the tree spectra differ from one another in shape and magnitude?
+
+#### Q2) What tree spectral profile most closely matches the Image-Green profile?
+
+#### Q3) What do the differences in shape and magnitude between each of the tree spectra and Image-Green potentially/most likely indicate (what is responsible for differences, if any)?
+
+**Take a screenshot of the Spectral Library Viewer showing the 5 ground cover spectra and the Image-Yellow spectra with the Legend included. Include this screenshot in your final deliverables**
+
+#### Q4) How (if at all) do the non-tree spectra differ from one another in shape and magnitude?
+
+#### Q5) What ground cover spectral profile most closely matches the Image-Yellow profile?
+
+#### Q6) What do the differences (if any) in shape and magnitude between each of the non-tree spectra and Image-Yellow potentially/most likely indicate (what is responsible for differences, if any)?
+
+------------------------------------------------------------------------
+
+### Task 4: Using the Spectral Angle Mapper (SAM) to classify a scene
+
+**Step 1:** We will use a supervised classification to classify the image. First, we need to create Regions of Interest representing the different classes present in the image. Examine the image and define **4-5 distinct land cover types visible in the imagery**. For example multiple types of forest and grassland may be identified. 
+
+To classify the image we need to create Regions of Interest (ROIs) for each of the classes. 
+
+To do this, right-click on the image in the Layer Manager and select "New Region of Interest". Draw polygons onto the image to select areas representing each class. When you are done with a class, click the "New ROI" button and delineate the next class. Give each ROI a descriptive name. 
+
+``` {r, echo=FALSE, out.width = "30%", fig.align = 'center'}
+knitr::include_graphics('images/01/02-roi.png')
+```
+
+**Step 2:** When you are finished, right-click on the "Regions of Interest" in the Layer Manager and select "Statistics for all ROIs". This will bring up a plot showing the average reflectance across all wavelengths for each ROI.     
+
+#### Q7) Include a screenshot of the spectra from your ROIs. Compare your ROIs to the 14 reference spectra from the previous task. What are the dominant species present in each land cover type you defined? 
+
+#### Q8) Identify a wavelength with the most dissimilarity between cover types. Why do you think this occurs?   
+
+**Step 3:** We will be using the Spectral Angle Mapper to classify our image using the ROIs you just identified.  The SAM is an automated method for comparing image spectra to reference spectra from the ROIs. 
+
+The SAM algorithm determines the similarity between two spectra by calculating the spectral angle between them, treating them as unit vectors in spectral space with dimensionality equal to the number of bands. The simplest way to look at this classifier is to consider a hypothetical image pixel spectrum from a two-band image and a library spectrum. The two spectra can be represented in a two-dimensional scatter plot as two points (Figure 3). A vector from the origin through each point describes the position of each respective spectrum under all possible illumination conditions.
+
+``` {r, echo=FALSE, out.width = "40%", fig.align = 'center'}
+knitr::include_graphics('images/01/02-sam.png')
+```
+
+In the Toolbox > Supervised Classification > Spectral Angle Mapper. Add the hyperspectral image to the "Input Raster" and all the ROIs you created to the "Input ROIs". Click OK. Depending on the classes you defined you should get something like the following:
+
+``` {r, echo=FALSE, out.width = "80%", fig.align = 'center'}
+knitr::include_graphics('images/01/02-sam-class.png')
+```
+
+You can toggle the classes on/off in the Layer Manager. Plot the hyperspectral image underneath the classification and compare the two layers. 
+
+#### Q9) Do you see any issues with your land cover classification? What additional data or processing steps could be used to improve the image classification?  
